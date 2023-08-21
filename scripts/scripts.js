@@ -1,12 +1,14 @@
 window.addEventListener('load',function(){
   const canvas = document.getElementById('canvas1');
   const ctx = canvas.getContext('2d');
-  canvas.width = 1600;
+  canvas.width = 1200;
   canvas.height = 720;
+  let score = 0;
 
   class InputHandler {
     constructor(){
       this.keys = [];
+      this.touchTreshold = 30;
       window.addEventListener('keydown', e=> {
         if ((e.key === "ArrowUp" ||
             e.key === "ArrowDown" ||
@@ -24,6 +26,39 @@ window.addEventListener('load',function(){
             e.key === "ArrowLeft") {
           this.keys.splice(this.keys.indexOf(e.key), 1);
         }   
+      });
+
+      window.addEventListener('touchstart', e=>{
+        this.touchX = e.changedTouches[0].pageX;
+        this.touchY = e.changedTouches[0].pageY;
+      });
+
+      window.addEventListener('touchmove', e=> {
+        const swapedistanceX = e.changedTouches[0].pageX -this.touchX;
+        const swapeDistanceY = e.changedTouches[0].pageY -this.touchY;
+        if (swapeDistanceY < -this.touchTreshold && this.keys.indexOf('ArrowUp') === -1) {
+          this.keys.push('ArrowUp');
+        } else if (swapedistanceY > this.touchTreshold && this.keys.indexOf('ArrowUp') === -1 ) {
+          if (gameOver) restartGame();
+        } else if (swapedistanceX < -this.touchTreshold && this.keys.indexOf('ArrowLeft') === -1) {
+          this.keys.push('ArrowLeft');
+        } else if (swapedistanceX > this.touchTreshold && this.keys.indexOf('ArrowRight') === -1) {
+          this.keys.push('ArrowRight');
+        }       
+      });
+
+      window.addEventListener('touchend', e=> {
+        const swapedistanceX = e.changedTouches[0].pageX -this.touchX;
+        const swapeDistanceY = e.changedTouches[0].pageY -this.touchY;
+        if (swapeDistanceY < -this.touchTreshold) {
+          this.keys.splice(this.keys.indexOf('ArrowUp'), 1);
+        } else if (swapedistanceX < -this.touchTreshold) {
+          this.keys.splice(this.keys.indexOf('ArrowLeft'), 1);
+        } else if (swapedistanceX > this.touchTreshold) {
+          this.keys.splice(this.keys.indexOf('ArrowRight'), 1);
+        }  
+       
+
       });
 
     }
@@ -102,7 +137,7 @@ window.addEventListener('load',function(){
       this.gameHeight = gameHeight;
       this.enemies = [];
       this.timeToNextEnemy = 0;
-      this.enemyInterval = 1000;
+      this.enemyInterval = 2000;
       this.typeOfEnemy = ['ghost', 'spider', 'worm'];
     }
 
