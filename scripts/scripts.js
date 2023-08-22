@@ -8,7 +8,9 @@ window.addEventListener('load',function(){
   class InputHandler {
     constructor(){
       this.keys = [];
-      this.touchTreshold = 30;
+      this.touchTreshold = 50;
+      this.touchX = 0;
+      this.touchY = 0;
       window.addEventListener('keydown', e=> {
         if ((e.key === "ArrowUp" ||
             e.key === "ArrowDown" ||
@@ -34,27 +36,27 @@ window.addEventListener('load',function(){
       });
 
       window.addEventListener('touchmove', e=> {
-        const swapedistanceX = e.changedTouches[0].pageX -this.touchX;
+        const swapeDistanceX = e.changedTouches[0].pageX -this.touchX;
         const swapeDistanceY = e.changedTouches[0].pageY -this.touchY;
         if (swapeDistanceY < -this.touchTreshold && this.keys.indexOf('ArrowUp') === -1) {
           this.keys.push('ArrowUp');
-        } else if (swapedistanceY > this.touchTreshold && this.keys.indexOf('ArrowUp') === -1 ) {
+        } else if (swapeDistanceY > this.touchTreshold && this.keys.indexOf('ArrowDown') === -1 ) {
           if (gameOver) restartGame();
-        } else if (swapedistanceX < -this.touchTreshold && this.keys.indexOf('ArrowLeft') === -1) {
+        } else if (swapeDistanceX < -this.touchTreshold && this.keys.indexOf('ArrowLeft') === -1) {
           this.keys.push('ArrowLeft');
-        } else if (swapedistanceX > this.touchTreshold && this.keys.indexOf('ArrowRight') === -1) {
+        } else if (swapeDistanceX > this.touchTreshold && this.keys.indexOf('ArrowRight') === -1) {
           this.keys.push('ArrowRight');
         }       
       });
 
       window.addEventListener('touchend', e=> {
-        const swapedistanceX = e.changedTouches[0].pageX -this.touchX;
+        const swapeDistanceX = e.changedTouches[0].pageX -this.touchX;
         const swapeDistanceY = e.changedTouches[0].pageY -this.touchY;
         if (swapeDistanceY < -this.touchTreshold) {
           this.keys.splice(this.keys.indexOf('ArrowUp'), 1);
-        } else if (swapedistanceX < -this.touchTreshold) {
+        } else if (swapeDistanceX < -this.touchTreshold) {
           this.keys.splice(this.keys.indexOf('ArrowLeft'), 1);
-        } else if (swapedistanceX > this.touchTreshold) {
+        } else if (swapeDistanceX > this.touchTreshold) {
           this.keys.splice(this.keys.indexOf('ArrowRight'), 1);
         }  
        
