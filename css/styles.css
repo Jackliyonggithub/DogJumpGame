@@ -1,5 +1,11 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  background: white;
+  background: black;
 }
 
 #canvas1 {
@@ -17,3 +23,13 @@ body {
 #backgroundImage, #playerImage, #worm, #ghost, #spider {
   display: none;
 } 
+
+#fullScreen{
+  position: absolute;
+  font-size: 20px;
+  top: 10px;
+  padding: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+
+}

@@ -1,10 +1,11 @@
 window.addEventListener('load',function(){
   const canvas = document.getElementById('canvas1');
   const ctx = canvas.getContext('2d');
-  canvas.width = 1400;
-  canvas.height = 720;
+  canvas.width = 1200;
+  canvas.height = 600;
   let score = 0;
   let gameOver = false;
+  const fullScreenButton = document.getElementById('fullScreen');
 
 
   class InputHandler {
@@ -357,7 +358,7 @@ window.addEventListener('load',function(){
     ctx.fillText('score:' + score, 22, 52);
     if (gameOver) {
       ctx.textAlign = 'center';
-      ctx.font = '50px Helvetica';
+      ctx.font = '40px Helvetica';
       ctx.fillStyle = 'black';    
       ctx.fillText('GAME OVER: press Enter  or swipe down to restart game! ', canvas.width * 1/2, canvas.height * 1/2);
       ctx.fillStyle = 'red';    
@@ -367,7 +368,7 @@ window.addEventListener('load',function(){
   
 
   let lastTime = 0;
-  const inputHandler = new InputHandler();
+  const inputHandler = new InputHandler(); 
   const enemiesHandle = new EnemiesHandle(canvas.width, canvas.height);
   const background = new Background();
 
@@ -379,6 +380,20 @@ window.addEventListener('load',function(){
     gameOver = false;
     animate(0);
   }
+
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      canvas.requestFullscreen().catch(
+        error => {
+          alert(`full mode can't be activated, ${error.message}`)
+        }
+      )
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  fullScreenButton.addEventListener('click', toggleFullScreen);
 
   function animate(timeStamp) { 
     const deltaTime = timeStamp - lastTime;
