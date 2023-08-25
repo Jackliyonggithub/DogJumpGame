@@ -1,9 +1,11 @@
 window.addEventListener('load',function(){
   const canvas = document.getElementById('canvas1');
   const ctx = canvas.getContext('2d');
-  canvas.width = 1200;
+  canvas.width = 1400;
   canvas.height = 720;
   let score = 0;
+  let gameOver = false;
+
 
   class InputHandler {
     constructor(){
@@ -18,7 +20,9 @@ window.addEventListener('load',function(){
             e.key === "ArrowRight")
             && this.keys.indexOf(e.key) === -1) {
           this.keys.push(e.key);
-        }  
+        }  else if (e.key === 'Enter' && gameOver) {
+          restartGame();
+        }
       });
 
       window.addEventListener('keyup', e=> {
@@ -50,15 +54,17 @@ window.addEventListener('load',function(){
       });
 
       window.addEventListener('touchend', e=> {
-        const swapeDistanceX = e.changedTouches[0].pageX -this.touchX;
-        const swapeDistanceY = e.changedTouches[0].pageY -this.touchY;
-        if (swapeDistanceY < -this.touchTreshold) {
-          this.keys.splice(this.keys.indexOf('ArrowUp'), 1);
-        } else if (swapeDistanceX < -this.touchTreshold) {
-          this.keys.splice(this.keys.indexOf('ArrowLeft'), 1);
-        } else if (swapeDistanceX > this.touchTreshold) {
-          this.keys.splice(this.keys.indexOf('ArrowRight'), 1);
-        }  
+        // const swapeDistanceX = e.changedTouches[0].pageX -this.touchX;
+        // const swapeDistanceY = e.changedTouches[0].pageY -this.touchY;
+        // if (swapeDistanceY < -this.touchTreshold) {
+        //   this.keys.splice(this.keys.indexOf('ArrowUp'), 1);
+        // } else if (swapeDistanceX < -this.touchTreshold) {
+        //   this.keys.splice(this.keys.indexOf('ArrowLeft'), 1);
+        // } else if (swapeDistanceX > this.touchTreshold) {
+        //   this.keys.splice(this.keys.indexOf('ArrowRight'), 1);
+        // }  
+
+        this.keys = [];
        
 
       });
@@ -131,7 +137,18 @@ window.addEventListener('load',function(){
     onGround(){
       return this.y >= this.gameHeight - this.height;
     }
+
+    restart(){
+      this.x = 0;
+      this.y = this.gameHeight - this.height;
+      this.frameX = 0;
+      this.frameY = 0;
+      this.speedX = 0;
+      this.speedY = 0;    }
+
   }
+
+  const player = new Player(canvas.width, canvas.height);
 
   class EnemiesHandle {
     constructor(gamewidth,gameHeight){
@@ -151,6 +168,11 @@ window.addEventListener('load',function(){
       this.enemies = this.enemies.filter(enemy => !enemy.markedDeletion);
       this.enemies.forEach(enemy => {
         enemy.update(deltaTime);
+        const dx = (enemy.x + enemy.width *1/2) - (player.x + player.width * 1/2);
+        const dy = (enemy.y + enemy.height *1/2) - (player.y + player.height * 1/2);
+        if (Math.sqrt( dx * dx + dy * dy) < (enemy.width + player.width) * 1/3) {
+          gameOver = true;
+        }
       });
     }
 
@@ -172,6 +194,10 @@ window.addEventListener('load',function(){
         this.enemies.push(new Spider(this));
       }
     }
+
+    restart(){
+      this.enemies = [];
+    }
   }
 
   class Enemy {
@@ -187,6 +213,10 @@ window.addEventListener('load',function(){
     }
 
     update(deltaTime){
+      if (this.x < -this.width) {
+        this.markedDeletion = true;
+        score += 1;
+      }
       if (this.timeToNextFrame >this.maxFrame) {
         if (this.frame > this.maxFrame) {
           this.frame = 0;
@@ -217,9 +247,9 @@ window.addEventListener('load',function(){
     update(deltaTime) {
       super.update(deltaTime);
       this.x -= this.speedX;
-      if (this.x < -this.width) {
-        this.markedDeletion = true;
-      }
+      // if (this.x < -this.width) {
+      //   this.markedDeletion = true;
+      // }
     }
   }
 
@@ -242,12 +272,12 @@ window.addEventListener('load',function(){
     update(deltaTime) {
       super.update(deltaTime);
       this.x -= this.speedX;
-      if (this.x < -this.width) {
-        this.markedDeletion = true;
-      }
+      // if (this.x < -this.width) {
+      //   this.markedDeletion = true;
+      // }
 
       this.alpha += this.speedY;
-      this.y = this.gameHeight *2/5 + this.gameHeight * 1/3 * Math.sin(this.alpha);
+      this.y = this.gameHeight *2/5 + this.gameHeight * 1/5 * Math.sin(this.alpha);
     }
   }
 
@@ -259,25 +289,31 @@ window.addEventListener('load',function(){
       this.spriteHeight = 175;
       this.width = this.spriteWidth * 1/2;
       this.height = this.spriteHeight * 1/2;
-      this.x = Math.random() * (this.gameWidth - this.width);
+      this.x = Math.random() * (this.gameWidth - this.width) * 1/3 + this.gameWidth * 2/3;
       this.y = 0;
-      this.speedY = Math.random() * 3 + 3;
+      this.speedX = 2;
+      this.speedY = Math.random() * 5 + 5;
       this.image = spider;
     }
 
     update(deltaTime) {
       super.update(deltaTime);
       this.y += this.speedY;
-      if (this.y < -this.height) {
-        this.markedDeletion = true;
-      };
-      if (this.y >= (this.gameHeight - this.height)) {
+      this.x -= this.speedX;
+      // if (this.x < -this.width) {
+      //   this.markedDeletion = true;
+      // };
+      if (this.y >= (this.gameHeight - this.height) || this.y <= 0) {
         this.speedY = -this.speedY;
       };
     }
 
     draw(ctx){
       super.draw(ctx);
+      ctx.beginPath();
+      ctx.moveTo(this.x + this.width * 1/2, 0);
+      ctx.lineTo(this.x +this.width * 1/2, this.y);
+      ctx.stroke();
     }
   }
 
@@ -285,7 +321,7 @@ window.addEventListener('load',function(){
     constructor(){
       this.width = 2400;
       this.height = 720;
-      this.speedX = 5;
+      this.speedX = 2;
       this.backgroundCounter = 0;
       this.x = 0;
       this.image = backgroundImage;
@@ -306,13 +342,44 @@ window.addEventListener('load',function(){
       ctx.drawImage(this.image, this.x + this.width * this.backgroundCounter, 0, this.width, this.height);
       ctx.drawImage(this.image, this.x + this.width * (this.backgroundCounter + 1) -1, 0, this.width, this.height);
     }
+
+    restart(){
+      this.x = 0;
+    }
   }
+
+  function displayScore(cxt) {
+    ctx.textAlign = 'left';
+    ctx.font = '40px Helvetica';
+    ctx.fillStyle = 'black';    
+    ctx.fillText('score:' + score, 20, 50);
+    ctx.fillStyle = 'white';    
+    ctx.fillText('score:' + score, 22, 52);
+    if (gameOver) {
+      ctx.textAlign = 'center';
+      ctx.font = '50px Helvetica';
+      ctx.fillStyle = 'black';    
+      ctx.fillText('GAME OVER: press Enter  or swipe down to restart game! ', canvas.width * 1/2, canvas.height * 1/2);
+      ctx.fillStyle = 'red';    
+      ctx.fillText('GAME OVER: press Enter  or swipe down to restart game! ', canvas.width * 1/2 +2, canvas.height * 1/2 +2);
+    }
+  }
+  
 
   let lastTime = 0;
   const inputHandler = new InputHandler();
   const enemiesHandle = new EnemiesHandle(canvas.width, canvas.height);
-  const player = new Player(canvas.width, canvas.height);
   const background = new Background();
+
+  function restartGame(){
+    player.restart();
+    background.restart();
+    enemiesHandle.restart();
+    score = 0;
+    gameOver = false;
+    animate(0);
+  }
+
   function animate(timeStamp) { 
     const deltaTime = timeStamp - lastTime;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -323,7 +390,10 @@ window.addEventListener('load',function(){
     player.draw(ctx);
     enemiesHandle.update(deltaTime);
     enemiesHandle.draw(ctx);
-    requestAnimationFrame(animate);
+    displayScore(ctx);
+    if (!gameOver) {
+      requestAnimationFrame(animate);
+    };
   }
   animate(0);
 });
